@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +16,6 @@ export default function Dashboard() {
   const [userData, setUserData] = useState({ email: '', password: '', role: 'ExeCom' });
   const [contactData, setContactData] = useState({ email: '', phone: '', address: '', instagram: '', linkedin: '' });
   
-  
   // NEW: Password Change State
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
   
@@ -29,6 +29,14 @@ export default function Dashboard() {
   const [editExecomId, setEditExecomId] = useState(null);
   const [editUserId, setEditUserId] = useState(null);
 
+  // --- FETCHING --- 
+  // (MOVED HERE: These must be declared before the useEffect calls them)
+  const fetchEvents = async () => { try { const res = await axios.get('http://localhost:5000/api/events'); setEventsList(res.data); } catch (err) { console.error('Failed', err); } };
+  const fetchExecom = async () => { try { const res = await axios.get('http://localhost:5000/api/execom'); setExecomList(res.data); } catch (err) { console.error('Failed', err); } };
+  const fetchUsers = async () => { try { const token = localStorage.getItem('token'); const res = await axios.get('http://localhost:5000/api/auth/users', { headers: { Authorization: `Bearer ${token}` } }); setUsersList(res.data); } catch (err) { console.error('Failed', err); } };
+  const fetchContactInfo = async () => { try { const res = await axios.get('http://localhost:5000/api/contact'); setContactData(res.data); } catch (err) { console.error('Failed', err); } };
+
+  // --- USE EFFECTS ---
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) { alert('Access Denied.'); navigate('/auth'); }
@@ -41,11 +49,6 @@ export default function Dashboard() {
     if (activeTab === 'settings' && role === 'Admin') fetchContactInfo();
   }, [activeTab, role]);
 
-  // --- FETCHING ---
-  const fetchEvents = async () => { try { const res = await axios.get('http://localhost:5000/api/events'); setEventsList(res.data); } catch (err) { console.error('Failed'); } };
-  const fetchExecom = async () => { try { const res = await axios.get('http://localhost:5000/api/execom'); setExecomList(res.data); } catch (err) { console.error('Failed'); } };
-  const fetchUsers = async () => { try { const token = localStorage.getItem('token'); const res = await axios.get('http://localhost:5000/api/auth/users', { headers: { Authorization: `Bearer ${token}` } }); setUsersList(res.data); } catch (err) { console.error('Failed'); } };
-  const fetchContactInfo = async () => { try { const res = await axios.get('http://localhost:5000/api/contact'); setContactData(res.data); } catch (err) { console.error('Failed'); } };
 
   // --- EVENT HANDLERS ---
   const handleEventSubmit = async (e) => {
@@ -93,8 +96,8 @@ export default function Dashboard() {
       alert(`Backend Error: ${errorMessage}`);
       setError('❌ Failed to save event.'); }
   };
-  const handleEditEvent = (event) => { setEventData({ ...event, date: new Date(event.date).toISOString().split('T')[0] }); setEditEventId(event._id); window.scrollTo(0, 0); };
-  const handleDeleteEvent = async (id) => { if (!window.confirm("Delete event?")) return; try { const token = localStorage.getItem('token'); await axios.delete(`http://localhost:5000/api/events/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Event deleted!'); fetchEvents(); } catch (err) { setError('❌ Failed.'); } };
+  const handleEditEvent = (event) => { setEventData({ ...event, date: new Date(event.date).toISOString().split('T')[0] }); setEditEventId(event.id); window.scrollTo(0, 0); };
+  const handleDeleteEvent = async (id) => { if (!window.confirm("Delete event?")) return; try { const token = localStorage.getItem('token'); await axios.delete(`http://localhost:5000/api/events/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Event deleted!'); fetchEvents(); } catch (err) { console.error(err); setError('❌ Failed.'); } };
 
   // --- EXECOM HANDLERS ---
   const handleExecomSubmit = async (e) => {
@@ -104,10 +107,10 @@ export default function Dashboard() {
       if (editExecomId) await axios.put(`http://localhost:5000/api/execom/${editExecomId}`, execomData, { headers: { Authorization: `Bearer ${token}` } });
       else await axios.post('http://localhost:5000/api/execom', execomData, { headers: { Authorization: `Bearer ${token}` } });
       setMessage('✅ Member saved!'); setExecomData({ name: '', position: '', department: '', year: '2026', email: '', linkedin: '', ieee: '' }); setEditExecomId(null); fetchExecom();
-    } catch (err) { setError('❌ Failed to save member.'); }
+    } catch (err) { console.error(err); setError('❌ Failed to save member.'); }
   };
-  const handleEditExecom = (member) => { setExecomData(member); setEditExecomId(member._id); window.scrollTo(0, 0); };
-  const handleDeleteExecom = async (id) => { if (!window.confirm("Delete member?")) return; try { const token = localStorage.getItem('token'); await axios.delete(`http://localhost:5000/api/execom/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Member deleted!'); fetchExecom(); } catch (err) { setError('❌ Failed.'); } };
+  const handleEditExecom = (member) => { setExecomData(member); setEditExecomId(member.id); window.scrollTo(0, 0); };
+  const handleDeleteExecom = async (id) => { if (!window.confirm("Delete member?")) return; try { const token = localStorage.getItem('token'); await axios.delete(`http://localhost:5000/api/execom/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Member deleted!'); fetchExecom(); } catch (err) { console.error(err); setError('❌ Failed.'); } };
 
   // --- USER HANDLERS ---
   const handleUserSubmit = async (e) => {
@@ -124,13 +127,13 @@ export default function Dashboard() {
       setUserData({ email: '', password: '', role: 'ExeCom' }); setEditUserId(null); fetchUsers();
     } catch (err) { setError(err.response?.data?.message || err.response?.data?.error || '❌ Failed to save user.'); }
   };
-  const handleEditUser = (user) => { setUserData({ email: user.email, password: '', role: user.role }); setEditUserId(user._id); window.scrollTo(0, 0); };
-  const handleDeleteUser = async (id) => { if (!window.confirm("Delete this user forever? This cannot be undone.")) return; try { const token = localStorage.getItem('token'); await axios.delete(`http://localhost:5000/api/auth/users/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ User deleted!'); fetchUsers(); } catch (err) { setError('❌ Failed.'); } };
+  const handleEditUser = (user) => { setUserData({ email: user.email, password: '', role: user.role }); setEditUserId(user.id); window.scrollTo(0, 0); };
+  const handleDeleteUser = async (id) => { if (!window.confirm("Delete this user forever? This cannot be undone.")) return; try { const token = localStorage.getItem('token'); await axios.delete(`http://localhost:5000/api/auth/users/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ User deleted!'); fetchUsers(); } catch (err) { console.error(err); setError('❌ Failed.'); } };
 
   // --- CONTACT HANDLERS ---
   const handleContactSubmit = async (e) => {
     e.preventDefault(); setMessage(''); setError('');
-    try { const token = localStorage.getItem('token'); await axios.put('http://localhost:5000/api/contact', contactData, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Contact info updated!'); } catch (err) { setError('❌ Failed.'); }
+    try { const token = localStorage.getItem('token'); await axios.put('http://localhost:5000/api/contact', contactData, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Contact info updated!'); } catch (err) { console.error(err); setError('❌ Failed.'); }
   };
 
   // --- NEW: PASSWORD CHANGE HANDLER ---
@@ -259,11 +262,11 @@ export default function Dashboard() {
             <h3 style={{marginTop: '3rem', color: '#002855'}}>Existing Events</h3>
             <div style={styles.listContainer}>
               {eventsList.map(ev => (
-                <div key={ev._id} style={styles.listItem}>
+                <div key={ev.id} style={styles.listItem}>
                   <div><strong>{ev.title}</strong> - {new Date(ev.date).toLocaleDateString()}</div>
                   <div style={styles.actionButtons}>
                     <button onClick={() => handleEditEvent(ev)} style={styles.editBtn}>Edit</button>
-                    <button onClick={() => handleDeleteEvent(ev._id)} style={styles.deleteBtn}>Delete</button>
+                    <button onClick={() => handleDeleteEvent(ev.id)} style={styles.deleteBtn}>Delete</button>
                   </div>
                 </div>
               ))}
@@ -297,11 +300,11 @@ export default function Dashboard() {
             <h3 style={{marginTop: '3rem', color: '#002855'}}>Existing Members</h3>
             <div style={styles.listContainer}>
               {execomList.map(member => (
-                <div key={member._id} style={styles.listItem}>
+                <div key={member.id} style={styles.listItem}>
                   <div><strong>{member.name}</strong> - {member.position} ({member.year})</div>
                   <div style={styles.actionButtons}>
                     <button onClick={() => handleEditExecom(member)} style={styles.editBtn}>Edit</button>
-                    <button onClick={() => handleDeleteExecom(member._id)} style={styles.deleteBtn}>Delete</button>
+                    <button onClick={() => handleDeleteExecom(member.id)} style={styles.deleteBtn}>Delete</button>
                   </div>
                 </div>
               ))}
@@ -337,11 +340,11 @@ export default function Dashboard() {
             <h3 style={{marginTop: '3rem', color: '#002855'}}>Registered Users</h3>
             <div style={styles.listContainer}>
               {usersList.map((user) => (
-                <div key={user._id} style={styles.listItem}>
+                <div key={user.id} style={styles.listItem}>
                   <div><strong>{user.email}</strong> - <span style={{color: user.role === 'Admin' ? '#047481' : '#00629B', fontWeight: 'bold'}}>{user.role}</span></div>
                   <div style={styles.actionButtons}>
                     <button onClick={() => handleEditUser(user)} style={styles.editBtn}>Edit</button>
-                    <button onClick={() => handleDeleteUser(user._id)} style={styles.deleteBtn}>Delete</button>
+                    <button onClick={() => handleDeleteUser(user.id)} style={styles.deleteBtn}>Delete</button>
                   </div>
                 </div>
               ))}
@@ -365,24 +368,23 @@ export default function Dashboard() {
   );
 }
 
-// Exactly the same clean styling as before
 const styles = {
-  container: { display: 'flex', minHeight: '80vh', backgroundColor: '#f4f7f6', borderRadius: '8px', overflow: 'hidden' },
-  sidebar: { width: '250px', backgroundColor: '#002855', padding: '2rem', color: 'white' },
+  container: { display: 'flex', minHeight: '80vh', backgroundColor: 'var(--card-bg)', backdropFilter: 'blur(16px)', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--card-border)', margin: '2rem auto', maxWidth: '1400px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' },
+  sidebar: { width: '250px', backgroundColor: 'rgba(5, 5, 5, 0.6)', padding: '2rem', color: 'white', borderRight: '1px solid var(--card-border)' },
   sidebarList: { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' },
-  sidebarItem: { padding: '0.8rem', borderRadius: '4px', cursor: 'pointer', color: '#a0b2c6', fontWeight: 'bold' },
-  activeSidebarItem: { padding: '0.8rem', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#00629B', color: 'white', fontWeight: 'bold' },
-  mainContent: { flex: 1, padding: '3rem' },
-  header: { color: '#002855', margin: '0 0 1.5rem 0' },
-  successBox: { backgroundColor: '#e6fffa', color: '#047481', padding: '1rem', borderRadius: '4px', marginBottom: '1.5rem', fontWeight: 'bold' },
-  errorBox: { backgroundColor: '#ffeef0', color: '#e63946', padding: '1rem', borderRadius: '4px', marginBottom: '1.5rem', fontWeight: 'bold' },
-  form: { backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '1.2rem' },
+  sidebarItem: { padding: '0.8rem', borderRadius: '8px', cursor: 'pointer', color: 'var(--text-secondary)', fontWeight: 'bold', transition: 'all 0.3s' },
+  activeSidebarItem: { padding: '0.8rem', borderRadius: '8px', cursor: 'pointer', background: 'linear-gradient(135deg, var(--neon-purple), #6d28d9)', color: 'white', fontWeight: 'bold', boxShadow: '0 0 15px rgba(139, 92, 246, 0.4)' },
+  mainContent: { flex: 1, padding: '3rem', overflowY: 'auto' },
+  header: { color: 'white', margin: '0 0 1.5rem 0', fontFamily: 'Playfair Display, serif' },
+  successBox: { backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', fontWeight: 'bold', border: '1px solid rgba(16, 185, 129, 0.3)' },
+  errorBox: { backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', fontWeight: 'bold', border: '1px solid rgba(239, 68, 68, 0.3)' },
+  form: { backgroundColor: 'rgba(0,0,0,0.2)', padding: '2rem', borderRadius: '12px', border: '1px solid var(--card-border)', display: 'flex', flexDirection: 'column', gap: '1.2rem' },
   row: { display: 'flex', gap: '1rem' },
-  input: { padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1rem', fontFamily: 'inherit' },
-  button: { backgroundColor: '#00629B', color: 'white', padding: '1rem', border: 'none', borderRadius: '4px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer' },
+  input: { padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--card-border)', fontSize: '1rem', fontFamily: 'inherit', backgroundColor: 'rgba(0,0,0,0.4)', color: 'white' },
+  button: { background: 'linear-gradient(135deg, var(--neon-purple), #6d28d9)', color: 'white', padding: '1rem', border: 'none', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s' },
   listContainer: { display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '1rem' },
-  listItem: { backgroundColor: 'white', padding: '1rem 1.5rem', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #eaeaea', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' },
+  listItem: { backgroundColor: 'rgba(0,0,0,0.3)', padding: '1rem 1.5rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--card-border)', color: 'white' },
   actionButtons: { display: 'flex', gap: '0.5rem' },
-  editBtn: { backgroundColor: '#fca311', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' },
-  deleteBtn: { backgroundColor: '#e63946', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }
+  editBtn: { backgroundColor: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', border: '1px solid #f59e0b', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' },
+  deleteBtn: { backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid #ef4444', padding: '0.4rem 0.8rem', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }
 };

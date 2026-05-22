@@ -1,59 +1,45 @@
-// server/routes/execomRoutes.js
 const express = require('express');
 const router = express.Router();
-const ExeCom = require('../models/ExeCom');
 const verifyToken = require('../middleware/authMiddleware');
+const { supabase } = require('../config/supabase'); 
 
-// GET route (PUBLIC): Fetch all members for the frontend
+// 1. GET ALL EXECOM
 router.get('/', async (req, res) => {
   try {
-    const members = await ExeCom.find();
-    res.json(members);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+    const { data: execom, error } = await supabase.from('execom').select('*');
+    if (error) throw error;
+    res.json(execom);
+  } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// POST route (PRIVATE): Add a new member
+// 2. CREATE MEMBER
 router.post('/', verifyToken, async (req, res) => {
-  // Security Check: Only Admins can add members
-  if (req.user.role !== 'Admin') {
-    return res.status(403).json({ message: 'Only Admins can add ExeCom members.' });
-  }
-
-  const member = new ExeCom(req.body);
+  if (req.user.role !== 'Admin') return res.status(403).json({ message: 'Unauthorized' });
   try {
-    const newMember = await member.save();
-    res.status(201).json(newMember);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
+    const { data, error } = await supabase.from('execom').insert([req.body]).select();
+    if (error) throw error;
+    res.status(201).json(data[0]);
+  } catch (err) { res.status(400).json({ message: err.message }); }
 });
 
-// UPDATE an existing ExeCom member
+// 3. UPDATE MEMBER
 router.put('/:id', verifyToken, async (req, res) => {
-  if (req.user.role !== 'Admin') {
-    return res.status(403).json({ message: 'Only Admins can edit members.' });
-  }
+  if (req.user.role !== 'Admin') return res.status(403).json({ message: 'Unauthorized' });
   try {
-    const updatedMember = await ExeCom.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updatedMember);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
+    const { data, error } = await supabase.from('execom').update(req.body).eq('id', req.params.id).select();
+    if (error) throw error;
+    res.json(data[0]);
+  } catch (err) { res.status(400).json({ message: err.message }); }
 });
 
-// DELETE an ExeCom member
+// 4. DELETE MEMBER
 router.delete('/:id', verifyToken, async (req, res) => {
-  if (req.user.role !== 'Admin') {
-    return res.status(403).json({ message: 'Only Admins can delete members.' });
-  }
+  if (req.user.role !== 'Admin') return res.status(403).json({ message: 'Unauthorized' });
   try {
-    await ExeCom.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Member deleted successfully.' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+    const { error } = await supabase.from('execom').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ message: 'Member deleted' });
+  } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 module.exports = router;

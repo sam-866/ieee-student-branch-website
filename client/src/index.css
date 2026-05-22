@@ -1,137 +1,134 @@
-/* client/src/index.css */
-
-/* =========================================
-   1. GLOBAL VARIABLES (IEEE Theme)
-========================================= */
+/* --- PREMIUM DARK MODE WITH GLASSMORPHISM --- */
 :root {
-  --ieee-blue: #00629B;
-  --ieee-dark: #002855;
-  --ieee-gold: #fca311;
-  --ieee-black: #1a1a1a;
-  --bg-light: #f4f7f6;
-  --text-main: #4a5568;
-  --text-muted: #a0b2c6;
-  
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-  --shadow-md: 0 8px 16px rgba(0,0,0,0.08);
-  --shadow-hover: 0 12px 24px rgba(0, 98, 155, 0.15);
-  
-  --transition: all 0.3s ease-in-out;
-}
-
-/* =========================================
-   2. MODERN CSS RESET
-========================================= */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth; /* Smooth scrolling for anchor links */
+  --bg-dark: #0a0a0f;
+  --bg-darker: #050505;
+  --neon-purple: #8b5cf6; 
+  --neon-blue: #00f3ff;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --card-bg: rgba(20, 20, 35, 0.65); 
+  --card-border: rgba(255, 255, 255, 0.08);
 }
 
 body {
+  margin: 0;
   font-family: 'Inter', sans-serif;
-  background-color: var(--bg-light);
-  color: var(--text-main);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+  color: var(--text-primary);
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.15), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.1), transparent 25%);
+  background-attachment: fixed;
+  overflow-x: hidden;
 }
 
-h1, h2, h3, h4 {
-  color: var(--ieee-dark);
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  margin-top: 0;
   font-weight: 700;
-  line-height: 1.2;
 }
 
-a {
-  text-decoration: none;
-  transition: var(--transition);
+/* --- GLASSMORPHISM UTILITY --- */
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* =========================================
-   3. GLOBAL ELEMENTS (Inputs & Buttons)
-========================================= */
-/* This automatically makes every input field on your site look beautiful */
-input, select, textarea {
-  font-family: 'Inter', sans-serif;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background-color: #f8fafc;
-  transition: var(--transition);
+/* --- ENERGETIC ANIMATIONS --- */
+.glow-hover {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.glow-hover:hover {
+  transform: translateY(-5px) scale(1.02);
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.5), inset 0 0 10px rgba(139, 92, 246, 0.2);
 }
 
-input:focus, select:focus {
-  outline: none;
-  border-color: var(--ieee-blue);
-  box-shadow: 0 0 0 3px rgba(0, 98, 155, 0.1);
-  background-color: #fff;
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-/* =========================================
-   4. UTILITY ANIMATION CLASSES
-========================================= */
-/* Add className="hover-lift" to any card to make it float when hovered! */
-.hover-lift {
-  transition: var(--transition);
+.animate-slide-up {
+  opacity: 0; /* Starts hidden */
+  animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.hover-lift:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-hover);
+/* Staggered delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* --- TYPOGRAPHY UTILITIES --- */
+.text-neon-purple {
+  color: var(--neon-purple);
+  text-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
 }
 
-/* Add className="btn-primary" to buttons */
+.text-gradient {
+  background: linear-gradient(to right, #ffffff, var(--neon-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* Primary Button */
 .btn-primary {
-  background-color: var(--ieee-blue);
+  background: linear-gradient(135deg, var(--neon-purple), #6d28d9);
   color: white;
-  transition: var(--transition);
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background-color: var(--ieee-dark);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 98, 155, 0.3);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
 }
 
-/* Navbar link hover effects */
-.nav-link {
-  position: relative;
+/* Input Fields */
+.glass-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--card-border);
+  color: white;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
 }
 
-.nav-link::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: -4px;
-  left: 0;
-  background-color: var(--ieee-gold);
-  transition: var(--transition);
+.glass-input:focus {
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
 }
 
-.nav-link:hover::after {
-  width: 100%;
+.glass-input::placeholder {
+  color: #64748b;
 }
 
-/* =========================================
-   5. MOBILE RESPONSIVENESS (Media Queries)
-========================================= */
-@media (max-width: 768px) {
-  /* Forces grids to collapse into single columns on phones */
-  .mobile-stack {
-    grid-template-columns: 1fr !important;
-  }
-  
-  /* Shrinks massive headers on phones */
-  h1 {
-    font-size: 2rem !important;
-  }
-  
-  /* Hides sidebar text and just shows icons, or stacks the dashboard */
-  .dashboard-container {
-    flex-direction: column !important;
-  }
+/* Page Container */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
 }

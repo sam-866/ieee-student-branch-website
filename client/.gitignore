@@ -1,38 +1,86 @@
+# =====================
+# Dependencies
+# =====================
+node_modules/
+
+# =====================
+# Build Outputs
+# =====================
+dist/
+dist-ssr/
+build/
+
+# Next.js
+.next/
+out/
+
+# =====================
+# Environment Variables
+# =====================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+
+# =====================
 # Logs
-logs
+# =====================
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+lint_output.txt
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# =====================
+# Editor / IDE Files
+# =====================
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+!.vscode/settings.json
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Dependency directories
-node_modules/
-client/node_modules/
-server/node_modules/
+# =====================
+# OS Generated Files
+# =====================
+.DS_Store
+Thumbs.db
+Desktop.ini
 
-# Environment variables (SECRETS)
-.env
-server/.env
-client/.env
+# =====================
+# Vite / ESLint Cache
+# =====================
+.vite/
+.eslintcache
 
-# Build outputs
-dist/
-build/
+# =====================
+# Testing
+# =====================
+coverage/
+
+# =====================
+# TypeScript
+# =====================
+*.tsbuildinfo
+next-env.d.ts
+
+# =====================
+# Deployment / Hosting
+# =====================
+.vercel/
+.netlify/
+
+# =====================
+# Misc
+# =====================
+.turbo/
+.cache/

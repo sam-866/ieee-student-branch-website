@@ -1,37 +1,44 @@
 // server/routes/contactRoutes.js
 const express = require('express');
 const router = express.Router();
-const Contact = require('../models/Contact');
 const verifyToken = require('../middleware/authMiddleware');
+const { supabase } = require('../config/supabase'); 
 
-// GET (PUBLIC): Fetch the contact info
+// 1. GET SITE CONTACT INFO
 router.get('/', async (req, res) => {
   try {
-    let contactInfo = await Contact.findOne();
-    
-    // THE TRICK: If it doesn't exist yet, create a default one automatically
-    if (!contactInfo) {
-      contactInfo = await Contact.create({}); 
-    }
-    
-    res.json(contactInfo);
+    // We target id: 1 since there is only ever one global contact record
+    const { data: contact, error } = await supabase
+      .from('contact')
+      .select('*')
+      .eq('id', 1)
+      .maybeSingle();
+
+    if (error) throw error;
+    res.json(contact || {});
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// PUT (PRIVATE): Update the contact info
+// 2. UPDATE SITE CONTACT INFO (Admin Only)
 router.put('/', verifyToken, async (req, res) => {
   if (req.user.role !== 'Admin') {
-    return res.status(403).json({ message: 'Only Admins can edit contact info.' });
+    return res.status(403).json({ message: 'Unauthorized. Admins only.' });
   }
 
   try {
-    // Find the single document and update it, returning the new version
-    const updatedContact = await Contact.findOneAndUpdate({}, req.body, { new: true, upsert: true });
-    res.json(updatedContact);
+    // .upsert will update the record if id:1 exists, or insert it if it's missing
+    const { data, error } = await supabase
+      .from('contact')
+      .upsert({ id: 1, ...req.body })
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: err.message });
   }
 });
 

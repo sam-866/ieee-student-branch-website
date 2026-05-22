@@ -1,7 +1,6 @@
 // server/server.js
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
@@ -9,11 +8,6 @@ const app = express();
 // Middleware
 app.use(cors()); // Allows frontend to make requests to backend
 app.use(express.json()); // Allows server to read JSON data from requests
-
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log('✅ Connected to MongoDB successfully!'))
-.catch((err) => console.error('❌ MongoDB connection error:', err));
 
 // A simple test route
 app.get('/api/test', (req, res) => {

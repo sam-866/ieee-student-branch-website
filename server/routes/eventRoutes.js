@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const Event = require('../models/Event');
 const verifyToken = require('../middleware/authMiddleware');
 // Import Supabase and the memory uploader
 const { supabase, upload } = require('../config/supabase');
@@ -8,14 +7,19 @@ const { supabase, upload } = require('../config/supabase');
 // GET route: Send all events to React
 router.get('/', async (req, res) => {
   try {
-    const events = await Event.find();
+    const { data: events, error } = await supabase
+      .from('events')
+      .select('*')
+      .order('date', { ascending: false }); // Automatically sorts by date!
+
+    if (error) throw error;
     res.json(events);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// POST route: Save a new event to MongoDB
+// 2. CREATE EVENT (Replaces new Event().save())
 router.post('/', verifyToken, upload.single('image'), async (req, res) => {
   if (req.user.role !== 'Admin' && req.user.role !== 'ExeCom') {
     return res.status(403).json({ message: 'Unauthorized.' });
@@ -24,39 +28,35 @@ router.post('/', verifyToken, upload.single('image'), async (req, res) => {
   try {
     const eventData = req.body;
     
-    // If an image was uploaded, send it to Supabase
+    // Handle the image upload exactly as we did before
     if (req.file) {
-      // 1. Create a unique, clean filename
-      const fileName = `${Date.now()}-${req.file.originalname.replace(/\s+/g, '_')}`;
+      const cleanFileName = req.file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '');
+      const fileName = `${Date.now()}-${cleanFileName}`;
       
-      // 2. Upload the buffer directly to Supabase
-      const { data, error } = await supabase.storage
-        .from('ieee-images') // Make sure this matches your bucket name perfectly!
-        .upload(fileName, req.file.buffer, {
-          contentType: req.file.mimetype,
-        });
-
-      if (error) throw error;
-
-      // 3. Get the public URL for the newly uploaded image
-      const { data: publicUrlData } = supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('ieee-images')
-        .getPublicUrl(fileName);
+        .upload(fileName, req.file.buffer, { contentType: req.file.mimetype });
+      if (uploadError) throw uploadError;
 
-      // 4. Attach the URL to our MongoDB document
+      const { data: publicUrlData } = supabase.storage
+        .from('ieee-images').getPublicUrl(fileName);
       eventData.image = publicUrlData.publicUrl;
     }
 
-    const event = new Event(eventData);
-    const newEvent = await event.save();
-    res.status(201).json(newEvent);
+    // NEW: Insert into Supabase database instead of MongoDB
+    const { data: newEvent, error: dbError } = await supabase
+      .from('events')
+      .insert([eventData])
+      .select(); // .select() tells Supabase to return the newly created object
+
+    if (dbError) throw dbError;
+    res.status(201).json(newEvent[0]);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// UPDATE an existing event (PUT)
-// Notice we added upload.single('image') right after verifyToken!
+// 4. UPDATE EVENT (PUT)
 router.put('/:id', verifyToken, upload.single('image'), async (req, res) => {
   if (req.user.role !== 'Admin' && req.user.role !== 'ExeCom') {
     return res.status(403).json({ message: 'Unauthorized.' });
@@ -65,44 +65,52 @@ router.put('/:id', verifyToken, upload.single('image'), async (req, res) => {
   try {
     const eventData = req.body;
 
-    // If the user uploaded a NEW image while editing, process it with Supabase
+    // If the user uploaded a NEW image while editing, process it
     if (req.file) {
       const cleanFileName = req.file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '');
       const fileName = `${Date.now()}-${cleanFileName}`;
       
-      const { data, error } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('ieee-images')
-        .upload(fileName, req.file.buffer, {
-          contentType: req.file.mimetype,
-          upsert: false
-        });
+        .upload(fileName, req.file.buffer, { contentType: req.file.mimetype });
 
-      if (error) throw error;
+      if (uploadError) throw uploadError;
 
       const { data: publicUrlData } = supabase.storage
         .from('ieee-images')
         .getPublicUrl(fileName);
 
-      // Overwrite the old image URL with the new Supabase URL
       eventData.image = publicUrlData.publicUrl;
     }
 
-    // Find the event by ID and update it with the new eventData
-    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, eventData, { new: true });
-    res.json(updatedEvent);
+    // Update the record in Supabase
+    const { data: updatedEvent, error: dbError } = await supabase
+      .from('events')
+      .update(eventData)
+      .eq('id', req.params.id)
+      .select();
+
+    if (dbError) throw dbError;
+    res.json(updatedEvent[0]);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// DELETE an event
+// 3. DELETE EVENT
 router.delete('/:id', verifyToken, async (req, res) => {
   if (req.user.role !== 'Admin' && req.user.role !== 'ExeCom') {
     return res.status(403).json({ message: 'Unauthorized.' });
   }
+  
   try {
-    await Event.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Event deleted successfully.' });
+    const { error } = await supabase
+      .from('events')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    res.json({ message: 'Event deleted successfully!' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
