@@ -1,4 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
+import ScrollReveal from '../components/ScrollReveal';
+import AnimatedCard from '../components/AnimatedCard';
 
 const societyDatabase = {
   computer: {
@@ -42,29 +44,31 @@ export default function Society() {
   }
 
   return (
-    <div className="page-container animate-slide-up" style={{ maxWidth: '1100px' }}>
+    <div className="page-container" style={{ maxWidth: '1100px' }}>
       
       {/* Dynamic Header Box */}
-      <div className="glass-panel" style={{ 
-        padding: '4rem 3rem', textAlign: 'center', marginBottom: '3rem',
-        borderTop: `4px solid ${society.themeColor}`,
-        background: `linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(20,20,35,0.65) 100%)`
-      }}>
-        <h1 style={{ margin: '0 0 0.5rem 0', color: 'white', fontSize: '3.5rem', textShadow: `0 0 20px ${society.themeColor}40` }}>
-          {society.name}
-        </h1>
-        <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.8rem', color: society.themeColor, textShadow: `0 0 10px ${society.themeColor}60` }}>
-          IEEE {society.abbreviation}
-        </h3>
-        <p style={{ fontSize: '1.3rem', color: 'var(--text-secondary)', fontStyle: 'italic', margin: 0 }}>
-          "{society.tagline}"
-        </p>
-      </div>
+      <ScrollReveal>
+        <div className="glass-panel" style={{ 
+          padding: '4rem 3rem', textAlign: 'center', marginBottom: '3rem',
+          borderTop: `4px solid ${society.themeColor}`,
+          background: `linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(20,20,35,0.65) 100%)`
+        }}>
+          <h1 style={{ margin: '0 0 0.5rem 0', color: 'white', fontSize: '3.5rem', textShadow: `0 0 20px ${society.themeColor}40` }}>
+            {society.name}
+          </h1>
+          <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.8rem', color: society.themeColor, textShadow: `0 0 10px ${society.themeColor}60` }}>
+            IEEE {society.abbreviation}
+          </h3>
+          <p style={{ fontSize: '1.3rem', color: 'var(--text-secondary)', fontStyle: 'italic', margin: 0 }}>
+            "{society.tagline}"
+          </p>
+        </div>
+      </ScrollReveal>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2.5rem' }}>
         
         {/* Main Content */}
-        <div className="glass-panel" style={{ padding: '3rem', gridColumn: '1 / -1', '@media (minWidth: 768px)': { gridColumn: 'span 2' } }}>
+        <AnimatedCard delay={0.2} className="glass-panel" style={{ padding: '3rem', gridColumn: '1 / -1', '@media (minWidth: 768px)': { gridColumn: 'span 2' } }}>
           <h2 style={{ color: 'white', borderBottom: '1px solid var(--card-border)', paddingBottom: '1rem', marginBottom: '1.5rem', fontSize: '1.8rem' }}>About Us</h2>
           <p style={{ lineHeight: '1.8', color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '3rem' }}>
             {society.description}
@@ -74,10 +78,10 @@ export default function Society() {
           <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px dashed var(--card-border)', padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)', borderRadius: '8px' }}>
             <p style={{ margin: 0 }}>No recent events posted for {society.abbreviation}.</p>
           </div>
-        </div>
+        </AnimatedCard>
 
         {/* Sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <AnimatedCard delay={0.4} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           <div className="glass-panel glow-hover" style={{ padding: '3rem 2rem', textAlign: 'center' }}>
             <h1 style={{ color: society.themeColor, margin: '0 0 0.5rem 0', fontSize: '4rem', textShadow: `0 0 20px ${society.themeColor}50` }}>
               {society.memberCount}
@@ -97,7 +101,7 @@ export default function Society() {
           >
             Join {society.abbreviation}
           </button>
-        </div>
+        </AnimatedCard>
       </div>
     </div>
   );

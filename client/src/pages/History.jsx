@@ -1,50 +1,47 @@
-import { useState } from 'react';
-
-// DUMMY DATA: The milestones of the IEEE branch
-const milestones = [
-  { id: 1, year: "2020", title: "Branch Established", description: "The IEEE Student Branch was officially inaugurated with a founding committee of 15 passionate engineering students." },
-  { id: 2, year: "2022", title: "First National Hackathon", description: "Hosted 'CodeFest 2022', bringing in over 500 participants from across the state for a 48-hour coding marathon." },
-  { id: 3, year: "2024", title: "Best Student Branch Award", description: "Awarded the prestigious 'Best Student Branch' in the regional section for outstanding community engagement and technical workshops." },
-  { id: 4, year: "2025", title: "WIE Affinity Group Launched", description: "Successfully launched the Women in Engineering (WIE) affinity group to promote diversity and inclusion in STEM fields." },
-  { id: 5, year: "2026", title: "Surpassed 500 Active Members", description: "Reached a massive milestone of 500 active student members, making us one of the largest branches in the region." }
-];
+import React from 'react';
+import ScrollReveal from '../components/ScrollReveal';
+import AnimatedCard from '../components/AnimatedCard';
 
 export default function History() {
+  const milestones = [
+    { year: "2018", title: "Branch Inception", description: "Our IEEE Student Branch was officially established, starting with just 25 passionate engineering students." },
+    { year: "2019", title: "First Hackathon", description: "Hosted our inaugural 24-hour hackathon, attracting over 150 participants from universities nationwide." },
+    { year: "2020", title: "WIE Chapter Formed", description: "Successfully launched the Women in Engineering affinity group to promote diversity in STEM." },
+    { year: "2021", title: "Excellence Award", description: "Awarded 'Best Emerging Student Branch' in our regional IEEE section." },
+    { year: "2023", title: "Global Summit", description: "Our executive committee represented the branch at the international IEEE student summit." },
+  ];
+
   return (
-    <div className="page-container animate-slide-up" style={{ maxWidth: '900px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-        <h1 className="text-gradient" style={{ fontSize: '3rem', margin: '0 0 0.5rem 0' }}>Our Journey</h1>
-        <p className="subtitle">A look back at the milestones that define our IEEE Student Branch.</p>
-      </div>
+    <div className="page-container" style={{ maxWidth: '900px' }}>
+      <ScrollReveal>
+        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          <h1 className="text-gradient" style={{ fontSize: '3rem', margin: '0 0 0.5rem 0' }}>Our Journey</h1>
+          <p className="subtitle">The milestones that shaped our student branch.</p>
+        </div>
+      </ScrollReveal>
 
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ position: 'relative' }}>
+        {/* Vertical Timeline Line */}
+        <div style={{ position: 'absolute', left: '50px', top: 0, bottom: 0, width: '4px', background: 'linear-gradient(180deg, var(--neon-purple), var(--neon-blue))', borderRadius: '2px', boxShadow: '0 0 15px rgba(139, 92, 246, 0.4)' }}></div>
+
         {milestones.map((milestone, index) => (
-          <div key={milestone.id} style={{ display: 'flex', gap: '1.5rem' }} className={`animate-slide-up delay-${(index % 5) * 100}`}>
-            
-            {/* LEFT COLUMN: The Year Bubble and Connecting Line */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '80px', flexShrink: 0 }}>
-              <div style={{ 
-                background: 'linear-gradient(135deg, var(--neon-purple), #6d28d9)', 
-                color: 'white', width: '70px', height: '70px', borderRadius: '50%', 
-                display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                fontWeight: 'bold', fontSize: '1.1rem', boxShadow: '0 0 15px rgba(139, 92, 246, 0.5)', zIndex: 2 
-              }}>
-                {milestone.year}
-              </div>
-              {index !== milestones.length - 1 && (
-                <div style={{ width: '4px', background: 'linear-gradient(to bottom, var(--neon-purple), transparent)', flex: 1, margin: '10px 0', borderRadius: '2px', opacity: 0.5 }}></div>
-              )}
-            </div>
+          <ScrollReveal key={index} delay={index * 0.15}>
+            <AnimatedCard className="glass-panel" style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '3rem', padding: '2rem', position: 'relative', marginLeft: '20px' }}>
+              
+              {/* Timeline Dot */}
+              <div style={{ position: 'absolute', left: '-40px', top: '2.5rem', width: '24px', height: '24px', borderRadius: '50%', background: 'var(--bg-dark)', border: '4px solid var(--neon-blue)', boxShadow: '0 0 10px var(--neon-blue)' }}></div>
 
-            {/* RIGHT COLUMN: The Content Card */}
-            <div style={{ flex: 1, paddingBottom: '3rem' }}>
-              <div className="glass-panel glow-hover" style={{ padding: '2rem', position: 'relative', top: '10px' }}>
-                <h3 className="text-gradient" style={{ margin: '0 0 0.8rem 0', fontSize: '1.5rem' }}>{milestone.title}</h3>
-                <p style={{ color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6' }}>{milestone.description}</p>
+              <div style={{ minWidth: '100px', paddingRight: '2rem' }}>
+                <h2 className="text-gradient" style={{ margin: 0, fontSize: '2.5rem' }}>{milestone.year}</h2>
               </div>
-            </div>
 
-          </div>
+              <div style={{ flex: 1, borderLeft: '1px solid var(--card-border)', paddingLeft: '2rem' }}>
+                <h3 style={{ color: 'white', fontSize: '1.5rem', margin: '0 0 0.5rem 0' }}>{milestone.title}</h3>
+                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0, fontSize: '1.05rem' }}>{milestone.description}</p>
+              </div>
+              
+            </AnimatedCard>
+          </ScrollReveal>
         ))}
       </div>
     </div>

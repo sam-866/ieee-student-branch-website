@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import ScrollReveal from '../components/ScrollReveal';
+import AnimatedCard from '../components/AnimatedCard';
 
 export default function Events() {
   const [events, setEvents] = useState([]); 
@@ -25,11 +27,13 @@ export default function Events() {
   });
 
   return (
-    <div className="page-container animate-slide-up" style={{ maxWidth: '1200px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-        <h1 className="text-gradient" style={{ fontSize: '3rem', margin: '0 0 0.5rem 0' }}>IEEE Events</h1>
-        <p className="subtitle">Discover what's happening in our student branch.</p>
-      </div>
+    <div className="page-container" style={{ maxWidth: '1200px' }}>
+      <ScrollReveal>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <h1 className="text-gradient" style={{ fontSize: '3rem', margin: '0 0 0.5rem 0' }}>IEEE Events</h1>
+          <p className="subtitle">Discover what's happening in our student branch.</p>
+        </div>
+      </ScrollReveal>
 
       {/* FILTER CONTROLS */}
       <div className="glass-panel" style={{ 
@@ -75,7 +79,7 @@ export default function Events() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event, index) => (
-            <div key={event.id} className={`glass-panel glow-hover animate-slide-up delay-${(index % 5) * 100}`} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+            <AnimatedCard key={event.id} delay={(index % 4) * 0.15} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <span style={{ backgroundColor: 'rgba(139, 92, 246, 0.2)', color: 'var(--neon-purple)', border: '1px solid var(--neon-purple)', padding: '0.3rem 0.8rem', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 'bold' }}>
                   {event.status}
@@ -89,7 +93,9 @@ export default function Events() {
                 <img 
                   src={event.image} 
                   alt={event.title} 
-                  style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '1.5rem' }} 
+                  style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '1.5rem', transition: 'transform 0.5s' }} 
+                  onMouseOver={e => e.target.style.transform = 'scale(1.05)'}
+                  onMouseOut={e => e.target.style.transform = 'scale(1)'}
                 />
               ) : (
                 <div style={{ width: '100%', height: '200px', background: 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.05))', borderRadius: '8px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontWeight: 'bold', border: '1px solid var(--card-border)' }}>
@@ -101,10 +107,10 @@ export default function Events() {
               <p style={{ margin: '0 0 0.5rem 0', color: 'var(--text-secondary)' }}><strong style={{ color: 'white' }}>Date:</strong> {new Date(event.date).toLocaleDateString()}</p>
               <p style={{ margin: '0 0 1.5rem 0', color: 'var(--text-secondary)', flex: 1 }}><strong style={{ color: 'white' }}>Type:</strong> {event.type}</p>
               
-              <button className="btn-primary" style={{ width: '100%', background: 'transparent', border: '1px solid var(--neon-purple)', color: 'var(--neon-purple)' }}>
+              <button className="btn-primary" style={{ width: '100%', background: 'transparent', border: '1px solid var(--neon-purple)', color: 'var(--neon-purple)', transition: 'all 0.3s' }} onMouseOver={e => {e.target.style.background='var(--neon-purple)'; e.target.style.color='white';}} onMouseOut={e => {e.target.style.background='transparent'; e.target.style.color='var(--neon-purple)';}}>
                 View Details
               </button>
-            </div>
+            </AnimatedCard>
           ))
         ) : (
           <p style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '1.2rem', padding: '3rem', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed var(--card-border)' }}>

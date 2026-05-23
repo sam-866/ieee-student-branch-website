@@ -1,4 +1,9 @@
 /* --- PREMIUM DARK MODE WITH GLASSMORPHISM --- */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px; /* Accounts for fixed navbar */
+}
+
 :root {
   --bg-dark: #0a0a0f;
   --bg-darker: #050505;
@@ -37,6 +42,10 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--card-border);
   border-radius: 16px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.glass-panel:hover .card-actions {
+  opacity: 1 !important;
 }
 
 /* --- ENERGETIC ANIMATIONS --- */
@@ -131,4 +140,86 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 1200px;
   margin: 0 auto;
   padding: 4rem 2rem;
+}
+
+/* --- MAP CARD ANIMATIONS --- */
+@keyframes rippleEffect {
+  to {
+    transform: translate(-50%, -50%) scale(25);
+    opacity: 0;
+  }
+}
+
+@keyframes mapBlobPulse {
+  0%   { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 1;   transform: scale(1.08); }
+}
+
+/* --- FUTURISTIC BUTTONS --- */
+@keyframes gradientShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.btn-futuristic-primary {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(270deg, var(--neon-purple), var(--neon-blue), var(--neon-purple));
+  background-size: 200% 200%;
+  animation: gradientShimmer 6s ease infinite;
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5), inset 0 0 10px rgba(255,255,255,0.2);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-futuristic-primary:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.7), 0 0 40px rgba(0, 243, 255, 0.4), inset 0 0 15px rgba(255,255,255,0.4);
+}
+
+.btn-futuristic-primary:active {
+  transform: translateY(2px) scale(0.97);
+  box-shadow: 0 2px 10px rgba(139, 92, 246, 0.5);
+}
+
+.btn-futuristic-glass {
+  position: relative;
+  overflow: hidden;
+  background: rgba(20, 20, 35, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-futuristic-glass:hover {
+  transform: translateY(-4px) scale(1.03);
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(0, 243, 255, 0.6);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.4), inset 0 0 15px rgba(0, 243, 255, 0.2);
+}
+
+.btn-futuristic-glass:active {
+  transform: translateY(2px) scale(0.97);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
