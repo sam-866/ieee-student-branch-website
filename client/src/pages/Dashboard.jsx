@@ -38,10 +38,10 @@ export default function Dashboard() {
   const [editUserId, setEditUserId] = useState(null);
 
   // --- FETCHING --- 
-  const fetchEvents = async () => { try { const res = await axios.get('http://localhost:5000/api/events'); setEventsList(res.data); } catch (err) { console.error('Failed', err); } };
-  const fetchExecom = async () => { try { const res = await axios.get('http://localhost:5000/api/execom'); setExecomList(res.data); } catch (err) { console.error('Failed', err); } };
-  const fetchUsers = async () => { try { const token = localStorage.getItem('token'); const res = await axios.get('http://localhost:5000/api/auth/users', { headers: { Authorization: `Bearer ${token}` } }); setUsersList(res.data); } catch (err) { console.error('Failed', err); } };
-  const fetchContactInfo = async () => { try { const res = await axios.get('http://localhost:5000/api/contact'); setContactData(res.data); } catch (err) { console.error('Failed', err); } };
+  const fetchEvents = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/events`); setEventsList(res.data); } catch (err) { console.error('Failed', err); } };
+  const fetchExecom = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/execom`); setExecomList(res.data); } catch (err) { console.error('Failed', err); } };
+  const fetchUsers = async () => { try { const token = localStorage.getItem('token'); const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/users`, { headers: { Authorization: `Bearer ${token}` } }); setUsersList(res.data); } catch (err) { console.error('Failed', err); } };
+  const fetchContactInfo = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/contact`); setContactData(res.data); } catch (err) { console.error('Failed', err); } };
 
   // --- USE EFFECTS ---
   useEffect(() => {
@@ -97,17 +97,17 @@ export default function Dashboard() {
 
     try {
       if (editEventId) {
-        await axios.put(`http://localhost:5000/api/events/${editEventId}`, formData, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } });
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/events/${editEventId}`, formData, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } });
         setMessage('✅ Event updated!');
       } else {
-        await axios.post('http://localhost:5000/api/events', formData, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } });
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/events`, formData, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } });
         setMessage('✅ Event published!');
       }
       closeModal(); fetchEvents();
     } catch (err) { setError(`❌ Failed to save event: ${err.response?.data?.message || err.message}`); }
   };
   const handleEditEvent = (event) => { setEventData({ ...event, date: new Date(event.date).toISOString().split('T')[0] }); setEditEventId(event.id); setIsModalOpen(true); };
-  const handleDeleteEvent = async (id) => { if (!window.confirm("Delete event?")) return; try { const token = localStorage.getItem('token'); await axios.delete(`http://localhost:5000/api/events/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Event deleted!'); fetchEvents(); } catch (err) { setError('❌ Failed.'); } };
+  const handleDeleteEvent = async (id) => { if (!window.confirm("Delete event?")) return; try { const token = localStorage.getItem('token'); await axios.delete(`${import.meta.env.VITE_API_URL}/api/events/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Event deleted!'); fetchEvents(); } catch (err) { setError('❌ Failed.'); } };
 
   // --- EXECOM HANDLERS ---
   const handleExecomSubmit = async (e) => {
@@ -127,8 +127,8 @@ export default function Dashboard() {
       if (execomPhotoFile) formData.append('photo', execomPhotoFile);
 
       const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' };
-      if (editExecomId) await axios.put(`http://localhost:5000/api/execom/${editExecomId}`, formData, { headers });
-      else await axios.post('http://localhost:5000/api/execom', formData, { headers });
+      if (editExecomId) await axios.put(`${import.meta.env.VITE_API_URL}/api/execom/${editExecomId}`, formData, { headers });
+      else await axios.post(`${import.meta.env.VITE_API_URL}/api/execom`, formData, { headers });
       setMessage('✅ Member saved!'); closeModal(); fetchExecom();
     } catch (err) { setError('❌ Failed to save member.'); }
   };
@@ -139,25 +139,25 @@ export default function Dashboard() {
     setEditExecomId(member.id);
     setIsModalOpen(true);
   };
-  const handleDeleteExecom = async (id) => { if (!window.confirm("Delete member?")) return; try { const token = localStorage.getItem('token'); await axios.delete(`http://localhost:5000/api/execom/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Member deleted!'); fetchExecom(); } catch (err) { setError('❌ Failed.'); } };
+  const handleDeleteExecom = async (id) => { if (!window.confirm("Delete member?")) return; try { const token = localStorage.getItem('token'); await axios.delete(`${import.meta.env.VITE_API_URL}/api/execom/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Member deleted!'); fetchExecom(); } catch (err) { setError('❌ Failed.'); } };
 
   // --- USER HANDLERS ---
   const handleUserSubmit = async (e) => {
     e.preventDefault(); setMessage(''); setError('');
     const token = localStorage.getItem('token');
     try {
-      if (editUserId) await axios.put(`http://localhost:5000/api/auth/users/${editUserId}`, userData, { headers: { Authorization: `Bearer ${token}` } });
-      else await axios.post('http://localhost:5000/api/auth/users', userData, { headers: { Authorization: `Bearer ${token}` } });
+      if (editUserId) await axios.put(`${import.meta.env.VITE_API_URL}/api/auth/users/${editUserId}`, userData, { headers: { Authorization: `Bearer ${token}` } });
+      else await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/users`, userData, { headers: { Authorization: `Bearer ${token}` } });
       setMessage('✅ User saved successfully!'); closeModal(); fetchUsers();
     } catch (err) { setError(err.response?.data?.message || err.response?.data?.error || '❌ Failed to save user.'); }
   };
   const handleEditUser = (user) => { setUserData({ email: user.email, password: '', role: user.role }); setEditUserId(user.id); setIsModalOpen(true); };
-  const handleDeleteUser = async (id) => { if (!window.confirm("Delete this user forever?")) return; try { const token = localStorage.getItem('token'); await axios.delete(`http://localhost:5000/api/auth/users/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ User deleted!'); fetchUsers(); } catch (err) { setError('❌ Failed.'); } };
+  const handleDeleteUser = async (id) => { if (!window.confirm("Delete this user forever?")) return; try { const token = localStorage.getItem('token'); await axios.delete(`${import.meta.env.VITE_API_URL}/api/auth/users/${id}`, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ User deleted!'); fetchUsers(); } catch (err) { setError('❌ Failed.'); } };
 
   // --- CONTACT HANDLERS ---
   const handleContactSubmit = async (e) => {
     e.preventDefault(); setMessage(''); setError('');
-    try { const token = localStorage.getItem('token'); await axios.put('http://localhost:5000/api/contact', contactData, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Contact info updated!'); } catch (err) { setError('❌ Failed.'); }
+    try { const token = localStorage.getItem('token'); await axios.put(`${import.meta.env.VITE_API_URL}/api/contact`, contactData, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Contact info updated!'); } catch (err) { setError('❌ Failed.'); }
   };
 
   // --- PASSWORD HANDLER ---
@@ -166,7 +166,7 @@ export default function Dashboard() {
     if (passwordData.new !== passwordData.confirm) return setError('New passwords do not match.');
     try {
       const token = localStorage.getItem('token');
-      await axios.put('http://localhost:5000/api/auth/change-password', { currentPassword: passwordData.current, newPassword: passwordData.new }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/auth/change-password`, { currentPassword: passwordData.current, newPassword: passwordData.new }, { headers: { Authorization: `Bearer ${token}` } });
       setMessage('✅ Password changed successfully!'); closeModal();
     } catch (err) { setError(err.response?.data?.message || '❌ Failed to change password.'); }
   };

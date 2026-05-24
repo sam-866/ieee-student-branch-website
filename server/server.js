@@ -24,8 +24,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/execom', execomRoutes); // Add this route
 app.use('/api/contact', contactRoutes); // Use
 
-// Start the server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
-});
+// Start the server only if running locally
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+  });
+}
+
+// Export the app for Vercel Serverless
+module.exports = app;

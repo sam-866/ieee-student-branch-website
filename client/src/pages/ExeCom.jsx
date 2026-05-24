@@ -10,7 +10,7 @@ export default function ExeCom() {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/execom');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/execom`);
         setMembers(response.data);
       } catch (error) {
         console.error("Error fetching ExeCom members:", error);

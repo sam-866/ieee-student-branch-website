@@ -17,7 +17,7 @@ export default function Auth() {
 
     try {
       const endpoint = authMode === 'register' ? '/api/auth/register' : '/api/auth/login';
-      const response = await axios.post(`http://localhost:5000${endpoint}`, { email, password });
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}${endpoint}`, { email, password });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('role', response.data.role);
       navigate('/dashboard');
@@ -31,7 +31,7 @@ export default function Auth() {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/google', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/google`, {
         credential: credentialResponse.credential,
       });
       localStorage.setItem('token', response.data.token);
