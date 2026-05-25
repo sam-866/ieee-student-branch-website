@@ -11,15 +11,16 @@ export default function ExeCom() {
     const fetchMembers = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/execom`);
-        setMembers(response.data);
+        setMembers(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error("Error fetching ExeCom members:", error);
+        setMembers([]);
       }
     };
     fetchMembers();
   }, []);
 
-  const filteredMembers = members.filter(member => member.year === activeYear);
+  const filteredMembers = Array.isArray(members) ? members.filter(member => member.year === activeYear) : [];
 
   return (
     <div className="page-container" style={{ maxWidth: '1200px' }}>

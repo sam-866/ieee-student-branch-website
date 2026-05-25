@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, Calendar, Users, Briefcase, Settings, UserCircle, LogOut, X, Key } from 'lucide-react';
+import { Plus, Edit2, Trash2, Calendar, Users, Briefcase, Settings, UserCircle, LogOut, X, Key, Clock } from 'lucide-react';
 
 import AnimatedCard from '../components/AnimatedCard';
 import TiltCard from '../components/TiltCard';
@@ -31,6 +31,13 @@ export default function Dashboard() {
   const [eventsList, setEventsList] = useState([]);
   const [execomList, setExecomList] = useState([]);
   const [usersList, setUsersList] = useState([]);
+  const [historyList, setHistoryList] = useState([]);
+
+  // History form state
+  const [historyData, setHistoryData] = useState({ year: '', title: '', description: '' });
+  const [historyImageFile, setHistoryImageFile] = useState(null);
+  const [historyImagePreview, setHistoryImagePreview] = useState(null);
+  const [editHistoryId, setEditHistoryId] = useState(null);
 
   // Editing Trackers
   const [editEventId, setEditEventId] = useState(null);
@@ -38,10 +45,11 @@ export default function Dashboard() {
   const [editUserId, setEditUserId] = useState(null);
 
   // --- FETCHING --- 
-  const fetchEvents = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/events`); setEventsList(res.data); } catch (err) { console.error('Failed', err); } };
-  const fetchExecom = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/execom`); setExecomList(res.data); } catch (err) { console.error('Failed', err); } };
-  const fetchUsers = async () => { try { const token = localStorage.getItem('token'); const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/users`, { headers: { Authorization: `Bearer ${token}` } }); setUsersList(res.data); } catch (err) { console.error('Failed', err); } };
+  const fetchEvents = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/events`); setEventsList(Array.isArray(res.data) ? res.data : []); } catch (err) { console.error('Failed', err); } };
+  const fetchExecom = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/execom`); setExecomList(Array.isArray(res.data) ? res.data : []); } catch (err) { console.error('Failed', err); } };
+  const fetchUsers = async () => { try { const token = localStorage.getItem('token'); const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/users`, { headers: { Authorization: `Bearer ${token}` } }); setUsersList(Array.isArray(res.data) ? res.data : []); } catch (err) { console.error('Failed', err); } };
   const fetchContactInfo = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/contact`); setContactData(res.data); } catch (err) { console.error('Failed', err); } };
+  const fetchHistory = async () => { try { const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/history`); setHistoryList(Array.isArray(res.data) ? res.data : []); } catch (err) { console.error('Failed', err); } };
 
   // --- USE EFFECTS ---
   useEffect(() => {
@@ -54,8 +62,7 @@ export default function Dashboard() {
     if (activeTab === 'execom' && role === 'Admin') fetchExecom();
     if (activeTab === 'users' && role === 'Admin') fetchUsers();
     if (activeTab === 'settings' && role === 'Admin') fetchContactInfo();
-    
-    // Clear messages when switching tabs
+    if (activeTab === 'history' && role === 'Admin') fetchHistory();
     setMessage(''); setError('');
   }, [activeTab, role]);
 
@@ -69,12 +76,14 @@ export default function Dashboard() {
   // --- MODAL UTILS ---
   const closeModal = () => {
     setIsModalOpen(false);
-    setEditEventId(null); setEditExecomId(null); setEditUserId(null);
+    setEditEventId(null); setEditExecomId(null); setEditUserId(null); setEditHistoryId(null);
     setEventData({ title: '', date: '', status: 'Upcoming', type: 'Workshop', mode: 'Offline', image: null });
     setExecomData({ name: '', position: '', department: '', year: '2026', email: '', linkedin: '', ieee: '' });
     setExecomPhotoFile(null); setExecomPhotoPreview(null);
     setUserData({ email: '', password: '', role: 'ExeCom' });
     setPasswordData({ current: '', new: '', confirm: '' });
+    setHistoryData({ year: '', title: '', description: '' });
+    setHistoryImageFile(null); setHistoryImagePreview(null);
   };
 
   const openAddModal = () => {
@@ -160,6 +169,41 @@ export default function Dashboard() {
     try { const token = localStorage.getItem('token'); await axios.put(`${import.meta.env.VITE_API_URL}/api/contact`, contactData, { headers: { Authorization: `Bearer ${token}` } }); setMessage('✅ Contact info updated!'); } catch (err) { setError('❌ Failed.'); }
   };
 
+  // --- HISTORY HANDLERS ---
+  const handleHistorySubmit = async (e) => {
+    e.preventDefault(); setMessage(''); setError('');
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('year', historyData.year);
+    formData.append('title', historyData.title);
+    formData.append('description', historyData.description);
+    if (!historyImageFile && historyData.image) formData.append('image', historyData.image);
+    if (historyImageFile) formData.append('image', historyImageFile);
+    try {
+      const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' };
+      if (editHistoryId) await axios.put(`${import.meta.env.VITE_API_URL}/api/history/${editHistoryId}`, formData, { headers });
+      else await axios.post(`${import.meta.env.VITE_API_URL}/api/history`, formData, { headers });
+      setMessage('✅ Milestone saved!'); closeModal(); fetchHistory();
+    } catch (err) { setError('❌ Failed to save milestone.'); }
+  };
+
+  const handleEditHistory = (milestone) => {
+    setHistoryData({ year: milestone.year, title: milestone.title, description: milestone.description, image: milestone.image });
+    setHistoryImageFile(null);
+    setHistoryImagePreview(milestone.image || null);
+    setEditHistoryId(milestone.id);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteHistory = async (id) => {
+    if (!window.confirm('Delete this milestone?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/history/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      setMessage('✅ Milestone deleted!'); fetchHistory();
+    } catch (err) { setError('❌ Failed.'); }
+  };
+
   // --- PASSWORD HANDLER ---
   const handlePasswordChange = async (e) => {
     e.preventDefault(); setMessage(''); setError('');
@@ -173,11 +217,12 @@ export default function Dashboard() {
 
   // --- UI CONSTANTS ---
   const tabs = [
-    { id: 'events', label: 'Events', icon: Calendar, adminOnly: false },
-    { id: 'execom', label: 'ExeCom', icon: Briefcase, adminOnly: true },
-    { id: 'users', label: 'Users', icon: Users, adminOnly: true },
-    { id: 'settings', label: 'Settings', icon: Settings, adminOnly: true },
-    { id: 'account', label: 'Account', icon: UserCircle, adminOnly: false },
+    { id: 'events',  label: 'Events',  icon: Calendar,     adminOnly: false },
+    { id: 'execom',  label: 'ExeCom',  icon: Briefcase,    adminOnly: true  },
+    { id: 'history', label: 'History', icon: Clock,        adminOnly: true  },
+    { id: 'users',   label: 'Users',   icon: Users,        adminOnly: true  },
+    { id: 'settings',label: 'Settings',icon: Settings,     adminOnly: true  },
+    { id: 'account', label: 'Account', icon: UserCircle,   adminOnly: false },
   ].filter(tab => !tab.adminOnly || role === 'Admin');
 
   return (
@@ -259,10 +304,11 @@ export default function Dashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
           <div>
             <h1 className="text-gradient" style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0' }}>
-              {activeTab === 'events' && 'Event Command Center'}
-              {activeTab === 'execom' && 'Executive Committee'}
-              {activeTab === 'users' && 'Authorized Access'}
-              {activeTab === 'settings' && 'System Configuration'}
+              {activeTab === 'events'  && 'Event Command Center'}
+              {activeTab === 'execom'  && 'Executive Committee'}
+              {activeTab === 'history' && 'Branch History'}
+              {activeTab === 'users'   && 'Authorized Access'}
+              {activeTab === 'settings'&& 'System Configuration'}
               {activeTab === 'account' && 'My Profile'}
             </h1>
             <p className="subtitle" style={{ margin: 0 }}>
@@ -271,7 +317,7 @@ export default function Dashboard() {
           </div>
 
           {/* DYNAMIC FLOATING ACTION BUTTON */}
-          {['events', 'execom', 'users'].includes(activeTab) && (
+          {['events', 'execom', 'history', 'users'].includes(activeTab) && (
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: '0 0 25px rgba(0, 243, 255, 0.5)' }}
               whileTap={{ scale: 0.95 }}
@@ -285,7 +331,7 @@ export default function Dashboard() {
               }}
             >
               <Plus size={20} />
-              <span>Add {activeTab === 'events' ? 'Event' : activeTab === 'execom' ? 'Member' : 'User'}</span>
+              <span>Add {activeTab === 'events' ? 'Event' : activeTab === 'execom' ? 'Member' : activeTab === 'history' ? 'Milestone' : 'User'}</span>
             </motion.button>
           )}
 
@@ -320,8 +366,8 @@ export default function Dashboard() {
         {/* --- TAB CONTENTS (GRID LAYOUTS) --- */}
         
         {activeTab === 'events' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
-            {eventsList.map((ev, i) => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+            {(eventsList || []).map((ev, i) => (
               <TiltCard key={ev.id} delay={i * 0.05} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                   <h3 style={{ margin: 0, color: 'white', fontSize: '1.2rem', paddingRight: '1rem' }}>{ev.title}</h3>
@@ -346,8 +392,8 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'execom' && role === 'Admin' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {execomList.map((member, i) => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+            {(execomList || []).map((member, i) => (
               <TiltCard key={member.id} delay={i * 0.05} className="glass-panel" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                   {/* Avatar: real photo or initial fallback */}
@@ -379,9 +425,42 @@ export default function Dashboard() {
           </div>
         )}
 
+        {activeTab === 'history' && role === 'Admin' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {(historyList || []).length === 0 && (
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed var(--card-border)' }}>
+                No milestones added yet. Click "Add Milestone" to get started.
+              </div>
+            )}
+            {(historyList || []).map((milestone, i) => (
+              <TiltCard key={milestone.id} delay={i * 0.05} className="glass-panel" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                  {/* Year badge */}
+                  <div style={{ minWidth: '80px', flexShrink: 0, textAlign: 'center' }}>
+                    <span style={{ fontSize: '1.8rem', fontWeight: 'bold', background: 'linear-gradient(135deg, var(--neon-purple), var(--neon-blue))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{milestone.year}</span>
+                  </div>
+                  {/* Content */}
+                  <div style={{ flex: 1, minWidth: '200px', borderLeft: '2px solid rgba(139,92,246,0.3)', paddingLeft: '1.25rem' }}>
+                    <h3 style={{ margin: '0 0 0.4rem 0', color: 'white', fontSize: '1.15rem', paddingRight: '5rem' }}>{milestone.title}</h3>
+                    <p style={{ margin: '0 0 0.75rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>{milestone.description}</p>
+                    {milestone.image && (
+                      <img src={milestone.image} alt={milestone.title} style={{ width: '100%', maxWidth: '360px', height: '160px', objectFit: 'cover', borderRadius: '8px', border: '1px solid rgba(139,92,246,0.2)' }} />
+                    )}
+                  </div>
+                </div>
+                {/* Actions */}
+                <div className="card-actions" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', opacity: 0, transition: 'opacity 0.3s ease' }}>
+                  <button onClick={() => handleEditHistory(milestone)} style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b', border: '1px solid #f59e0b', padding: '0.4rem', borderRadius: '6px', cursor: 'pointer' }}><Edit2 size={16} /></button>
+                  <button onClick={() => handleDeleteHistory(milestone.id)} style={{ background: 'rgba(239,68,68,0.2)', color: '#ef4444', border: '1px solid #ef4444', padding: '0.4rem', borderRadius: '6px', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                </div>
+              </TiltCard>
+            ))}
+          </div>
+        )}
+
         {activeTab === 'users' && role === 'Admin' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {usersList.map((user, i) => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+            {(usersList || []).map((user, i) => (
               <AnimatedCard key={user.id} delay={i * 0.05} className="glass-panel" style={{ padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(0, 243, 255, 0.1)', border: '1px solid rgba(0, 243, 255, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--neon-blue)' }}>
@@ -409,14 +488,14 @@ export default function Dashboard() {
               <Settings size={24} color="var(--neon-purple)" /> Contact Information Setup
             </h2>
             <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <input type="email" placeholder="Branch Email" value={contactData.email} onChange={e => setContactData({...contactData, email: e.target.value})} className="glass-input" style={{flex: 1}} required />
-                <input type="text" placeholder="Phone Number" value={contactData.phone} onChange={e => setContactData({...contactData, phone: e.target.value})} className="glass-input" style={{flex: 1}} required />
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <input type="email" placeholder="Branch Email" value={contactData.email} onChange={e => setContactData({...contactData, email: e.target.value})} className="glass-input" style={{flex: '1 1 250px'}} required />
+                <input type="text" placeholder="Phone Number" value={contactData.phone} onChange={e => setContactData({...contactData, phone: e.target.value})} className="glass-input" style={{flex: '1 1 250px'}} required />
               </div>
               <input type="text" placeholder="Physical Address" value={contactData.address} onChange={e => setContactData({...contactData, address: e.target.value})} className="glass-input" required />
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <input type="url" placeholder="LinkedIn URL" value={contactData.linkedin} onChange={e => setContactData({...contactData, linkedin: e.target.value})} className="glass-input" style={{flex: 1}} />
-                <input type="url" placeholder="Instagram URL" value={contactData.instagram} onChange={e => setContactData({...contactData, instagram: e.target.value})} className="glass-input" style={{flex: 1}} />
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <input type="url" placeholder="LinkedIn URL" value={contactData.linkedin} onChange={e => setContactData({...contactData, linkedin: e.target.value})} className="glass-input" style={{flex: '1 1 250px'}} />
+                <input type="url" placeholder="Instagram URL" value={contactData.instagram} onChange={e => setContactData({...contactData, instagram: e.target.value})} className="glass-input" style={{flex: '1 1 250px'}} />
               </div>
               <button type="submit" className="btn-primary" style={{ alignSelf: 'flex-start', padding: '1rem 2.5rem' }}>Save Configuration</button>
             </form>
@@ -464,11 +543,90 @@ export default function Dashboard() {
               </button>
 
               <h2 style={{ color: 'white', marginTop: 0, marginBottom: '2rem', borderBottom: '1px solid var(--card-border)', paddingBottom: '1rem' }}>
-                {activeTab === 'events' ? (editEventId ? 'Edit Event' : 'Add New Event') : null}
-                {activeTab === 'execom' ? (editExecomId ? 'Edit Member' : 'Add Member') : null}
-                {activeTab === 'users' ? (editUserId ? 'Edit Account' : 'Register User') : null}
+                {activeTab === 'events'  ? (editEventId   ? 'Edit Event'     : 'Add New Event')   : null}
+                {activeTab === 'execom'  ? (editExecomId  ? 'Edit Member'    : 'Add Member')      : null}
+                {activeTab === 'history' ? (editHistoryId ? 'Edit Milestone' : 'Add Milestone')   : null}
+                {activeTab === 'users'   ? (editUserId    ? 'Edit Account'   : 'Register User')   : null}
                 {activeTab === 'account' ? 'Change Password' : null}
               </h2>
+
+              {/* HISTORY FORM */}
+              {activeTab === 'history' && (
+                <form onSubmit={handleHistorySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <input
+                      type="text" placeholder="Year (e.g. 2024)"
+                      value={historyData.year}
+                      onChange={e => setHistoryData({...historyData, year: e.target.value})}
+                      className="glass-input" style={{ flex: '0 0 120px' }} required
+                    />
+                    <input
+                      type="text" placeholder="Milestone Title"
+                      value={historyData.title}
+                      onChange={e => setHistoryData({...historyData, title: e.target.value})}
+                      className="glass-input" style={{ flex: 1 }} required
+                    />
+                  </div>
+                  <textarea
+                    placeholder="Describe this milestone…"
+                    value={historyData.description}
+                    onChange={e => setHistoryData({...historyData, description: e.target.value})}
+                    className="glass-input" rows={4} required
+                    style={{ resize: 'vertical' }}
+                  />
+
+                  {/* Image uploader */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+                    <div
+                      onClick={() => document.getElementById('historyImageInput').click()}
+                      style={{
+                        width: '120px', height: '80px', borderRadius: '10px', flexShrink: 0,
+                        background: historyImagePreview ? 'transparent' : 'rgba(139,92,246,0.08)',
+                        border: '2px dashed rgba(139,92,246,0.4)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        overflow: 'hidden', cursor: 'pointer', transition: 'border-color 0.2s',
+                      }}
+                    >
+                      {historyImagePreview
+                        ? <img src={historyImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <span style={{ fontSize: '2rem' }}>🖼️</span>
+                      }
+                    </div>
+                    <div>
+                      <p style={{ margin: '0 0 0.5rem 0', color: 'white', fontWeight: '600', fontSize: '0.9rem' }}>Event Photo (Optional)</p>
+                      <p style={{ margin: '0 0 0.75rem 0', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>A photo from this milestone year.</p>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <label htmlFor="historyImageInput" style={{
+                          display: 'inline-block', padding: '0.4rem 1rem',
+                          background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.4)',
+                          color: 'var(--neon-purple)', borderRadius: '6px', cursor: 'pointer',
+                          fontSize: '0.85rem', fontWeight: '600'
+                        }}>
+                          {historyImagePreview ? 'Change Photo' : 'Upload Photo'}
+                        </label>
+                        {historyImagePreview && (
+                          <button type="button"
+                            onClick={() => { setHistoryImageFile(null); setHistoryImagePreview(null); setHistoryData(d => ({...d, image: null})); }}
+                            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' }}
+                          >Remove</button>
+                        )}
+                      </div>
+                      <input id="historyImageInput" type="file" accept="image/*" style={{ display: 'none' }}
+                        onChange={e => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          setHistoryImageFile(file);
+                          setHistoryImagePreview(URL.createObjectURL(file));
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <button type="submit" className="btn-primary" style={{ marginTop: '0.5rem', padding: '1rem' }}>
+                    {editHistoryId ? 'Save Changes' : 'Add to History'}
+                  </button>
+                </form>
+              )}
 
               {/* EVENT FORM */}
               {activeTab === 'events' && (

@@ -8,6 +8,7 @@ import History from './History';
 import Contact from './Contact';
 import ScrollProgress from '../components/ScrollProgress';
 import BackToTop from '../components/BackToTop';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function MainPage() {
   const location = useLocation();
@@ -33,23 +34,23 @@ export default function MainPage() {
       <BackToTop />
       
       <div id="home">
-        <Home />
+        <ErrorBoundary><Home /></ErrorBoundary>
       </div>
       
       <div id="events">
-        <Events />
+        <ErrorBoundary><Events /></ErrorBoundary>
       </div>
       
       <div id="execom">
-        <ExeCom />
+        <ErrorBoundary><ExeCom /></ErrorBoundary>
       </div>
       
       <div id="history">
-        <History />
+        <ErrorBoundary><History /></ErrorBoundary>
       </div>
       
       <div id="contact">
-        <Contact />
+        <ErrorBoundary><Contact /></ErrorBoundary>
       </div>
     </div>
   );

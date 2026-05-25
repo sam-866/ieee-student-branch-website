@@ -8,11 +8,11 @@ export default function Home() {
     <div style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh' }}>
       
       {/* Animated Background Orbs */}
-      <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(0,0,0,0) 70%)', filter: 'blur(60px)', zIndex: 0 }} />
-      <div style={{ position: 'absolute', top: '40%', right: '-5%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, rgba(0,0,0,0) 70%)', filter: 'blur(60px)', zIndex: 0 }} />
+      <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: 'min(600px, 80vw)', height: 'min(600px, 80vw)', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(0,0,0,0) 70%)', filter: 'blur(60px)', zIndex: 0 }} />
+      <div style={{ position: 'absolute', top: '40%', right: '-5%', width: 'min(500px, 70vw)', height: 'min(500px, 70vw)', background: 'radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, rgba(0,0,0,0) 70%)', filter: 'blur(60px)', zIndex: 0 }} />
       
       {/* 1. HERO SECTION */}
-      <section style={{ padding: '8rem 2rem', textAlign: 'center', position: 'relative', zIndex: 1, minHeight: '80vh', display: 'flex', alignItems: 'center' }}>
+      <section style={{ padding: 'clamp(4rem, 10vw, 8rem) 1rem', textAlign: 'center', position: 'relative', zIndex: 1, minHeight: '80vh', display: 'flex', alignItems: 'center' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <motion.h1 
             initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
@@ -77,9 +77,9 @@ export default function Home() {
       </section>
 
       {/* 2. ABOUT SECTION */}
-      <section style={{ padding: '5rem 2rem', position: 'relative', zIndex: 1 }}>
+      <section style={{ padding: 'clamp(3rem, 8vw, 5rem) 1rem', position: 'relative', zIndex: 1 }}>
         <ScrollReveal>
-          <div className="glass-panel" style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center', padding: '4rem 3rem' }}>
+          <div className="glass-panel" style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center', padding: 'clamp(2rem, 5vw, 4rem) clamp(1rem, 5vw, 3rem)' }}>
             <h2 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0' }}>About Our Branch</h2>
             <div style={{ width: '80px', height: '4px', background: 'var(--neon-purple)', margin: '0 auto 2.5rem auto', borderRadius: '2px', boxShadow: '0 0 10px rgba(139, 92, 246, 0.5)' }}></div>
             <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
@@ -90,13 +90,13 @@ export default function Home() {
       </section>
 
       {/* 3. SOCIETIES QUICK-LINKS */}
-      <section style={{ padding: '5rem 2rem', maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+      <section style={{ padding: 'clamp(3rem, 8vw, 5rem) 1rem', maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <ScrollReveal>
           <h2 style={{ fontSize: '2.5rem', textAlign: 'center', margin: '0 0 0.5rem 0' }}>Explore Our Societies</h2>
           <div style={{ width: '80px', height: '4px', background: 'var(--neon-purple)', margin: '0 auto 4rem auto', borderRadius: '2px', boxShadow: '0 0 10px rgba(139, 92, 246, 0.5)' }}></div>
         </ScrollReveal>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem' }}>
           {/* Computer Society Card */}
           <AnimatedCard delay={0.1} className="glass-panel" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', borderTop: '4px solid #00f3ff' }}>
             <h3 style={{ fontSize: '1.8rem', margin: '0 0 1rem 0' }}>Computer Society</h3>

@@ -1,0 +1,10 @@
+{
+  "name": "ieee-website",
+  "version": "1.0.0",
+  "description": "IEEE Student Branch Website - Root workspace",
+  "scripts": {
+    "dev": "start cmd /k \"cd server && node server.js\" && start cmd /k \"cd client && npm run dev\"",
+    "server": "cd server && node server.js",
+    "client": "cd client && npm run dev"
+  }
+}

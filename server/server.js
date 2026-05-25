@@ -17,12 +17,14 @@ app.get('/api/test', (req, res) => {
 // Import and use routes
 const eventRoutes = require('./routes/eventRoutes');
 const authRoutes = require('./routes/authRoutes');
-const execomRoutes = require('./routes/execomRoutes'); // Add this import
-const contactRoutes = require('./routes/contactRoutes'); // Import
+const execomRoutes = require('./routes/execomRoutes');
+const contactRoutes = require('./routes/contactRoutes');
+const historyRoutes = require('./routes/historyRoutes');
 app.use('/api/events', eventRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/execom', execomRoutes); // Add this route
-app.use('/api/contact', contactRoutes); // Use
+app.use('/api/execom', execomRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/history', historyRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 5000;

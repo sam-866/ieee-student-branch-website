@@ -12,19 +12,20 @@ export default function Events() {
     const fetchEvents = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/events`);
-        setEvents(response.data);
+        setEvents(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error("Error fetching events:", error);
+        setEvents([]);
       }
     };
     fetchEvents();
   }, []);
 
-  const filteredEvents = events.filter((event) => {
+  const filteredEvents = Array.isArray(events) ? events.filter((event) => {
     const matchesTab = activeTab === 'All' || event.status === activeTab;
     const matchesMode = modeFilter === 'All' || event.mode === modeFilter;
     return matchesTab && matchesMode;
-  });
+  }) : [];
 
   return (
     <div className="page-container" style={{ maxWidth: '1200px' }}>
@@ -76,7 +77,7 @@ export default function Events() {
       </div>
 
       {/* EVENT GRID */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event, index) => (
             <AnimatedCard key={event.id} delay={(index % 4) * 0.15} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
