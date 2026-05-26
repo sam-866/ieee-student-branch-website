@@ -5,8 +5,12 @@ const cors = require('cors');
 
 const app = express();
 
-// Middleware
-app.use(cors()); // Allows frontend to make requests to backend
+
+// Allow both your local Vite server and your live Vercel site
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://ieee-student-branch-website-rose.vercel.app/'],
+  credentials: true
+})); // Allows frontend to make requests to backend
 app.use(express.json()); // Allows server to read JSON data from requests
 
 // A simple test route
